@@ -14,9 +14,12 @@ Add to your `flake.nix`:
 
 ```nix
 {
-  inputs.nix-repo-sync = {
-    url = "github:Creator54/nix-repo-sync";
-    inputs.nixpkgs.follows = "nixpkgs";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/release-25.05";
+    nix-repo-sync = {
+      url = "github:Creator54/nix-repo-sync";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { nixpkgs, nix-repo-sync, ... }: {
