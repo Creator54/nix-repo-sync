@@ -50,7 +50,9 @@ let
       else if item.type == "local" then ''
         # Local symlink sync for ${item.dest}
         log "INFO: Processing local sync: ${item.source} -> ${item.dest}"
+        # Expand tilde to home directory
         SOURCE="${item.source}"
+        SOURCE="''${SOURCE/#\~/$HOME}"
         DEST="${item.dest}"
         # Expand tilde to home directory
         DEST="''${DEST/#\~/$HOME}"
