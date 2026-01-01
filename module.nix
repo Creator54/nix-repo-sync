@@ -88,7 +88,7 @@ in
       touch /var/log/nix-repo-sync.log || true
       chown ${cfg.user}:users /var/log/nix-repo-sync.log || true
       chmod 0644 /var/log/nix-repo-sync.log || true
-      ${pkgs.sudo}/bin/sudo -u ${cfg.user} ${syncConfig.service.serviceConfig.ExecStart} || true
+      PATH="${pkgs.openssh}/bin:$PATH" ${pkgs.sudo}/bin/sudo -u ${cfg.user} ${syncConfig.service.serviceConfig.ExecStart} || true
     '';
     
     # Install CLI utilities
