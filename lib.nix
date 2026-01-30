@@ -32,6 +32,16 @@ let
           log "INFO: Cloning ${item.source} to $DEST"
           if ${pkgs.git}/bin/git clone "${item.source}" "$DEST" 2>&1 | tee -a "$LOG_FILE"; then
             log "SUCCESS: Git clone completed for $DEST"
+            ${if item.postSync != null then ''
+              log "INFO: Running post-sync command for $DEST"
+              cd "$DEST"
+              if ${item.postSync} >> "$LOG_FILE" 2>&1; then
+                log "SUCCESS: Post-sync command succeeded"
+              else
+                log "ERROR: Post-sync command failed"
+                SYNC_FAILED=1
+              fi
+            '' else ""}
           else
             log "ERROR: Git clone failed for $DEST with exit code $?"
             SYNC_FAILED=1
@@ -39,8 +49,18 @@ let
         else
           log "INFO: Pulling latest changes for $DEST"
           cd "$DEST"
+          # Only run post-sync if there were updates or if it's forced (currently always runs on pull)
           if ${pkgs.git}/bin/git pull --ff-only 2>&1 | tee -a "$LOG_FILE"; then
             log "SUCCESS: Git pull completed for $DEST"
+            ${if item.postSync != null then ''
+              log "INFO: Running post-sync command for $DEST"
+              if ${item.postSync} >> "$LOG_FILE" 2>&1; then
+                log "SUCCESS: Post-sync command succeeded"
+              else
+                log "ERROR: Post-sync command failed"
+                SYNC_FAILED=1
+              fi
+            '' else ""}
           else
             log "ERROR: Git pull failed for $DEST with exit code $?"
             SYNC_FAILED=1

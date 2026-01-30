@@ -43,10 +43,15 @@ in
             example = "https://github.com/user/nvim-configs or /home/user/local-configs";
           };
 
-          dest = lib.mkOption {
-            type = lib.types.str;
             description = "Destination path (supports ~ for home directory)";
             example = "~/.config/nvim";
+          };
+
+          postSync = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Optional command to run after successful sync";
+            example = "bundle exec jekyll build";
           };
         };
       });
