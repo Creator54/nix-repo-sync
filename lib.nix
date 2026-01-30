@@ -47,22 +47,31 @@ let
             SYNC_FAILED=1
           fi
         else
-          log "INFO: Pulling latest changes for $DEST"
+          log "INFO: Fetching latest changes for $DEST"
           cd "$DEST"
-          # Only run post-sync if there were updates or if it's forced (currently always runs on pull)
-          if ${pkgs.git}/bin/git pull --ff-only 2>&1 | tee -a "$LOG_FILE"; then
-            log "SUCCESS: Git pull completed for $DEST"
-            ${if item.postSync != null then ''
-              log "INFO: Running post-sync command for $DEST"
-              if ${item.postSync} >> "$LOG_FILE" 2>&1; then
-                log "SUCCESS: Post-sync command succeeded"
-              else
-                log "ERROR: Post-sync command failed"
-                SYNC_FAILED=1
-              fi
-            '' else ""}
+          
+          # Force sync: fetch all and reset hard to match remote
+          if ${pkgs.git}/bin/git fetch --all 2>&1 | tee -a "$LOG_FILE"; then
+            CURRENT_BRANCH=$(${pkgs.git}/bin/git rev-parse --abbrev-ref HEAD)
+            log "INFO: Resetting $DEST ($CURRENT_BRANCH) to match remote"
+            
+            if ${pkgs.git}/bin/git reset --hard "origin/$CURRENT_BRANCH" 2>&1 | tee -a "$LOG_FILE"; then
+              log "SUCCESS: Git sync completed for $DEST"
+              ${if item.postSync != null then ''
+                log "INFO: Running post-sync command for $DEST"
+                if ${item.postSync} >> "$LOG_FILE" 2>&1; then
+                  log "SUCCESS: Post-sync command succeeded"
+                else
+                  log "ERROR: Post-sync command failed"
+                  SYNC_FAILED=1
+                fi
+              '' else ""}
+            else
+              log "ERROR: Git reset failed for $DEST with exit code $?"
+              SYNC_FAILED=1
+            fi
           else
-            log "ERROR: Git pull failed for $DEST with exit code $?"
+            log "ERROR: Git fetch failed for $DEST with exit code $?"
             SYNC_FAILED=1
           fi
         fi
