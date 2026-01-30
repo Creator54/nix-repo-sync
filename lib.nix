@@ -167,6 +167,17 @@ in
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     
+    path = with pkgs; [
+      nix
+      git
+      openssh
+      coreutils
+      findutils
+      gnugrep
+      gnused
+      systemd
+    ];
+    
     serviceConfig = {
       Type = "oneshot";
       User = user;
