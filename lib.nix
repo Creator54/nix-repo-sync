@@ -97,6 +97,15 @@ let
           mkdir -p "$(dirname "$DEST")"
           if ln -sf "$SOURCE" "$DEST" 2>&1 | tee -a "$LOG_FILE"; then
             log "SUCCESS: Symlink created: $DEST -> $SOURCE"
+            ${if item.postSync != null then ''
+              log "INFO: Running post-sync command for $DEST"
+              if ${item.postSync} >> "$LOG_FILE" 2>&1; then
+                log "SUCCESS: Post-sync command succeeded"
+              else
+                log "ERROR: Post-sync command failed"
+                SYNC_FAILED=1
+              fi
+            '' else ""}
           else
             log "ERROR: Failed to create symlink: $DEST -> $SOURCE"
             SYNC_FAILED=1
@@ -105,6 +114,15 @@ let
           mkdir -p "$(dirname "$DEST")"
           if ln -sf "$SOURCE" "$DEST" 2>&1 | tee -a "$LOG_FILE"; then
             log "SUCCESS: Symlink created: $DEST -> $SOURCE"
+            ${if item.postSync != null then ''
+              log "INFO: Running post-sync command for $DEST"
+              if ${item.postSync} >> "$LOG_FILE" 2>&1; then
+                log "SUCCESS: Post-sync command succeeded"
+              else
+                log "ERROR: Post-sync command failed"
+                SYNC_FAILED=1
+              fi
+            '' else ""}
           else
             log "ERROR: Failed to create symlink: $DEST -> $SOURCE"
             SYNC_FAILED=1
